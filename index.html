@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Surprise!</title>
+    <style>
+      :root {
+        --bg1: #0b1020;
+        --bg2: #1a0b2e;
+        --card: rgba(255, 255, 255, 0.08);
+        --card2: rgba(255, 255, 255, 0.12);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.7);
+        --accent1: #ff5ea8;
+        --accent2: #7c4dff;
+        --accent3: #34d399;
+        --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          "Noto Sans", "Helvetica Neue", sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+        background: radial-gradient(
+            1200px 800px at 15% 10%,
+            rgba(255, 94, 168, 0.22),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 700px at 85% 20%,
+            rgba(124, 77, 255, 0.2),
+            transparent 55%
+          ),
+          radial-gradient(
+            700px 500px at 60% 85%,
+            rgba(52, 211, 153, 0.14),
+            transparent 55%
+          ),
+          linear-gradient(135deg, var(--bg1), var(--bg2));
+        overflow-x: hidden;
+      }
+
+      .noise {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        opacity: 0.08;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+        background-size: 140px 140px;
+        z-index: 1;
+      }
+
+      canvas#confetti {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 3;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 18px 70px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 94, 168, 0.85),
+          rgba(124, 77, 255, 0.85)
+        );
+        box-shadow: var(--shadow);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .brand p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent3);
+        box-shadow: 0 0 18px rgba(52, 211, 153, 0.6);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.6);
+          opacity: 1;
+        }
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+      @media (max-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+      }
+      .card .inner {
+        padding: 18px;
+      }
+
+      .hero {
+        padding: 26px 22px 18px;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(
+            800px 260px at 20% 20%,
+            rgba(255, 94, 168, 0.22),
+            transparent 60%
+          ),
+          radial-gradient(
+            700px 250px at 85% 30%,
+            rgba(124, 77, 255, 0.18),
+            transparent 55%
+          );
+      }
+      .hero h2 {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1.15;
+        letter-spacing: 0.2px;
+      }
+      .hero p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 62ch;
+      }
+
+      .countdown {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .timebox {
+        min-width: 112px;
+        padding: 12px 12px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .timebox .num {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .timebox .lbl {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .btnrow {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      button,
+      .btn {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        padding: 11px 14px;
+        border-radius: 14px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        transition: transform 0.12s ease, background 0.12s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        user-select: none;
+      }
+      button:hover,
+      .btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.12);
+      }
+      button:active,
+      .btn:active {
+        transform: translateY(0px) scale(0.99);
+      }
+
+      .primary {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 94, 168, 0.92),
+          rgba(124, 77, 255, 0.92)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .lock {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .lock strong {
+        color: var(--text);
+      }
+      .lock .icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+      }
+
+      .sectionTitle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 0 0 10px;
+      }
+      .sectionTitle h3 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: 0.2px;
+      }
+      .sectionTitle span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 560px) {
+        .gallery {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .thumb {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        position: relative;
+        aspect-ratio: 1 / 1;
+        cursor: pointer;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transform: scale(1.02);
+        transition: transform 0.2s ease;
+      }
+      .thumb:hover img {
+        transform: scale(1.08);
+      }
+
+      .videoWrap {
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+      }
+      video {
+        width: 100%;
+        display: block;
+        background: black;
+      }
+
+      .message {
+        white-space: pre-wrap;
+        line-height: 1.55;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 14px;
+      }
+
+      /* Modal */
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 50;
+        padding: 18px;
+      }
+      .modal.open {
+        display: grid;
+      }
+      .modalCard {
+        max-width: 900px;
+        width: min(900px, 96vw);
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(20, 18, 35, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: var(--shadow);
+      }
+      .modalTop {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .modalBody img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      .xbtn {
+        border-radius: 12px;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text);
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      /* Locked state hides content */
+      .locked .revealOnly {
+        display: none;
+      }
+      .locked .lockOnly {
+        display: block;
+      }
+      .unlocked .revealOnly {
+        display: block;
+      }
+      .unlocked .lockOnly {
+        display: none;
+      }
+
+      footer {
+        margin-top: 16px;
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 12px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body class="locked">
+    <div class="noise"></div>
+    <canvas id="confetti"></canvas>
+
+    <div class="wrap">
+      <div class="top">
+        <div class="brand">
+          <div class="badge">♥</div>
+          <div>
+            <h1 id="siteTitle">Untuk Istri Tercinta</h1>
+            <p id="siteSubtitle">Ada sesuatu yang kebuka pas jam 00:00.</p>
+          </div>
+        </div>
+        <div class="pill">
+          <span class="dot"></span>
+          <span id="targetInfo">Target: besok 00:00</span>
+        </div>
+      </div>
+
+      <!-- LEFT: HERO -->
+      <div class="grid">
+        <div class="card hero">
+          <h2 id="heroTitle">Tunggu sebentar ya…</h2>
+          <p id="heroDesc">
+            Website ini akan terbuka otomatis pas jam 00:00 besok. Begitu kebuka, ada
+            foto-foto, video, dan pesan rahasia.
+          </p>
+
+          <div class="countdown" aria-label="countdown">
+            <div class="timebox">
+              <div class="num" id="dd">00</div>
+              <div class="lbl">Hari</div>
+            </div>
+            <div class="timebox">
+              <div class="num" id="hh">00</div>
+              <div class="lbl">Jam</div>
+            </div>
+            <div class="timebox">
+              <div class="num" id="mm">00</div>
+              <div class="lbl">Menit</div>
+            </div>
+            <div class="timebox">
+              <div class="num" id="ss">00</div>
+              <div class="lbl">Detik</div>
+            </div>
+          </div>
+
+          <div class="btnrow lockOnly">
+            <button id="previewBtn" title="Cek tampilan tanpa membuka kejutan">
+              Preview (Tanpa Buka)
+            </button>
+            <button id="muteBtn" title="Nyalakan/matikan musik (opsional)">
+              Musik: Off
+            </button>
+          </div>
+
+          <div class="btnrow revealOnly">
+            <button class="primary" id="confettiBtn">Rayakan</button>
+            <button id="muteBtn2">Musik: Off</button>
+          </div>
+
+          <div class="lock lockOnly">
+            <div class="icon">🔒</div>
+            <div>
+              <div><strong>Masih terkunci.</strong></div>
+              <div id="lockText">Akan kebuka otomatis saat waktu mencapai target.</div>
+            </div>
+          </div>
+
+          <div class="lock revealOnly">
+            <div class="icon">🎉</div>
+            <div>
+              <div><strong>Selamat ulang tahun!</strong></div>
+              <div id="openText">Aku sayang kamu. Scroll ke bawah ya.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: MESSAGE + VIDEO -->
+        <div class="card">
+          <div class="inner">
+            <div class="sectionTitle">
+              <h3>Pesan</h3>
+              <span class="lockOnly">Terkunci</span>
+              <span class="revealOnly">Terbuka</span>
+            </div>
+
+            <div class="message lockOnly" id="teaserMessage">
+              Aku punya kejutan kecil. Besok jam 00:00, semua akan kebuka. Jangan curang
+              ya.
+            </div>
+
+            <div class="message revealOnly" id="mainMessage"></div>
+
+            <div style="height: 14px"></div>
+
+            <div class="sectionTitle">
+              <h3>Video</h3>
+              <span id="videoHint" class="lockOnly">Akan muncul saat terbuka</span>
+            </div>
+
+            <div class="videoWrap revealOnly">
+              <video id="video" controls playsinline preload="metadata">
+                <!-- source diisi via JS -->
+              </video>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GALLERY -->
+      <div class="card" style="margin-top: 18px">
+        <div class="inner">
+          <div class="sectionTitle">
+            <h3>Galeri Foto</h3>
+            <span class="lockOnly">Terkunci</span>
+            <span class="revealOnly">Terbuka</span>
+          </div>
+
+          <div class="gallery lockOnly" id="lockedGallery">
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 1 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 2 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 3 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 4 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 5 (Terkunci)%3C/text%3E%3Csvg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 6 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+            <div class="thumb">
+              <img
+                alt="locked"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='100%25' height='100%25' fill='%23222233'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff88' font-size='20' font-family='Arial'%3EAlbum 7 (Terkunci)%3C/text%3E%3C/svg%3E" />
+            </div>
+          </div>
+
+          <div class="gallery revealOnly" id="gallery"></div>
+        </div>
+      </div>
+
+      <footer>
+        <!-- Dibuat dengan niat baik. Jika jam perangkat diubah, kunci waktu bisa ikut berubah. -->
+      </footer>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="preview foto">
+      <div class="modalCard">
+        <div class="modalTop">
+          <div id="modalLabel">Foto</div>
+          <button class="xbtn" id="closeModal">Tutup</button>
+        </div>
+        <div class="modalBody">
+          <img id="modalImg" alt="preview" src="" />
+        </div>
+      </div>
+    </div>
+
+    <audio id="bgm" preload="auto" loop></audio>
+
+    <script>
+      /***********************
+       * CONFIG (EDIT INI)
+       ***********************/
+
+      const CONFIG = {
+        wifeName: "Delia Devita",
+        // Pesan utama (muncul setelah terbuka)
+        message: `Happy birthday, my love.
+
+Thank you for being the most comfortable place I can call home.
+I hope today you feel truly loved, appreciated, and spoiled.
+I pray that you stay healthy, happy, and that everything you wish for comes true, little by little.
+
+I love you, always.`,
+
+        // Foto-foto (taruh di assets/photos/)
+        photos: [
+          "assets/photos/1.jpg",
+          "assets/photos/2.jpg",
+          "assets/photos/3.jpg",
+          "assets/photos/4.jpg",
+          "assets/photos/5.jpg",
+          "assets/photos/6.jpg",
+          "assets/photos/7.jpg",
+        ],
+
+        // Video (taruh di assets/videos/)
+        video: "assets/videos/video.mp4",
+
+        // Musik opsional (taruh di assets/ - bisa mp3)
+        music: "assets/music.mp3",
+
+        // Judul
+        siteTitle: "For Delia Devita",
+        siteSubtitle:
+          "There’s something special waiting for you It unlocks right at 00:00",
+        heroTitleLocked: "Tunggu sebentar ya…",
+        heroTitleUnlocked: "Happy Birthday!",
+        heroDescLocked:
+          "Website ini akan terbuka otomatis pas jam 00:00 besok. Begitu kebuka, ada foto-foto, video, dan pesan rahasia.",
+        heroDescUnlocked:
+          "Ini versi kecil dari rasa sayang yang besar. Scroll pelan-pelan, nikmati ya.",
+      };
+
+      /***********************
+       * TIME LOCK (00:00 besok)
+       ***********************/
+      function getTargetMidnightTomorrow() {
+        const now = new Date();
+        const target = new Date(now);
+        target.setDate(now.getDate() + 1);
+        target.setHours(0, 0, 0, 0);
+        // target.setDate(now.getDate());
+        // target.setHours(0, 0, 0, 0);
+        return target;
+      }
+
+      function pad2(n) {
+        return String(n).padStart(2, "0");
+      }
+
+      const els = {
+        body: document.body,
+        siteTitle: document.getElementById("siteTitle"),
+        siteSubtitle: document.getElementById("siteSubtitle"),
+        heroTitle: document.getElementById("heroTitle"),
+        heroDesc: document.getElementById("heroDesc"),
+        dd: document.getElementById("dd"),
+        hh: document.getElementById("hh"),
+        mm: document.getElementById("mm"),
+        ss: document.getElementById("ss"),
+        targetInfo: document.getElementById("targetInfo"),
+        lockText: document.getElementById("lockText"),
+        openText: document.getElementById("openText"),
+        teaserMessage: document.getElementById("teaserMessage"),
+        mainMessage: document.getElementById("mainMessage"),
+        gallery: document.getElementById("gallery"),
+        modal: document.getElementById("modal"),
+        modalImg: document.getElementById("modalImg"),
+        modalLabel: document.getElementById("modalLabel"),
+        closeModal: document.getElementById("closeModal"),
+        previewBtn: document.getElementById("previewBtn"),
+        confettiBtn: document.getElementById("confettiBtn"),
+        muteBtn: document.getElementById("muteBtn"),
+        muteBtn2: document.getElementById("muteBtn2"),
+        video: document.getElementById("video"),
+        bgm: document.getElementById("bgm"),
+      };
+
+      // Apply basic text config
+      els.siteTitle.textContent = CONFIG.siteTitle;
+      els.siteSubtitle.textContent = CONFIG.siteSubtitle;
+      els.mainMessage.textContent = CONFIG.message;
+
+      // Setup media sources
+      if (CONFIG.video) {
+        const src = document.createElement("source");
+        src.src = CONFIG.video;
+        src.type = "video/mp4";
+        els.video.appendChild(src);
+
+        els.video.muted = true;
+        els.video.volume = 0;
+      }
+      if (CONFIG.music) {
+        els.bgm.src = CONFIG.music;
+      }
+
+      const target = getTargetMidnightTomorrow();
+      els.targetInfo.textContent = `Target: ${target.toLocaleString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+
+      function setLockedUI() {
+        els.body.classList.add("locked");
+        els.body.classList.remove("unlocked");
+        els.heroTitle.textContent = CONFIG.heroTitleLocked;
+        els.heroDesc.textContent = CONFIG.heroDescLocked;
+      }
+
+      function setUnlockedUI() {
+        els.body.classList.remove("locked");
+        els.body.classList.add("unlocked");
+        els.heroTitle.textContent = CONFIG.heroTitleUnlocked;
+        els.heroDesc.textContent = CONFIG.heroDescUnlocked;
+        runConfetti(2200);
+      }
+
+      function updateCountdown() {
+        const now = new Date();
+        let diff = target.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          // unlocked
+          els.dd.textContent = "00";
+          els.hh.textContent = "00";
+          els.mm.textContent = "00";
+          els.ss.textContent = "00";
+          setUnlockedUI();
+          return true;
+        }
+
+        const sec = Math.floor(diff / 1000);
+        const days = Math.floor(sec / (3600 * 24));
+        const hours = Math.floor((sec % (3600 * 24)) / 3600);
+        const mins = Math.floor((sec % 3600) / 60);
+        const secs = sec % 60;
+
+        els.dd.textContent = pad2(days);
+        els.hh.textContent = pad2(hours);
+        els.mm.textContent = pad2(mins);
+        els.ss.textContent = pad2(secs);
+
+        setLockedUI();
+        return false;
+      }
+
+      /***********************
+       * Gallery (unlocked)
+       ***********************/
+      function buildGallery() {
+        els.gallery.innerHTML = "";
+        CONFIG.photos.forEach((p, idx) => {
+          const div = document.createElement("div");
+          div.className = "thumb";
+          const img = document.createElement("img");
+          img.loading = "lazy";
+          img.alt = `Photo ${idx + 1}`;
+          img.src = p;
+
+          div.appendChild(img);
+          div.addEventListener("click", () => openModal(p, `Foto ${idx + 1}`));
+          els.gallery.appendChild(div);
+        });
+      }
+
+      function openModal(src, label) {
+        els.modalLabel.textContent = label;
+        els.modalImg.src = src;
+        els.modal.classList.add("open");
+      }
+      function closeModal() {
+        els.modal.classList.remove("open");
+        els.modalImg.src = "";
+      }
+      els.closeModal.addEventListener("click", closeModal);
+      els.modal.addEventListener("click", (e) => {
+        if (e.target === els.modal) closeModal();
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
+
+      /***********************
+       * Music toggle
+       ***********************/
+      let musicOn = false;
+      async function toggleMusic() {
+        if (!CONFIG.music) return;
+
+        try {
+          if (!musicOn) {
+            await els.bgm.play(); // may require user gesture; this runs on button click
+            musicOn = true;
+          } else {
+            els.bgm.pause();
+            musicOn = false;
+          }
+        } catch (e) {
+          // autoplay blocked - keep off
+          musicOn = false;
+        }
+        syncMusicButtons();
+      }
+      function syncMusicButtons() {
+        const label = musicOn ? "Musik: On" : "Musik: Off";
+        if (els.muteBtn) els.muteBtn.textContent = label;
+        if (els.muteBtn2) els.muteBtn2.textContent = label;
+      }
+      if (els.muteBtn) els.muteBtn.addEventListener("click", toggleMusic);
+      if (els.muteBtn2) els.muteBtn2.addEventListener("click", toggleMusic);
+
+      /***********************
+       * Preview mode (shows gallery layout but doesn't unlock content)
+       ***********************/
+      els.previewBtn?.addEventListener("click", () => {
+        buildGallery();
+        // Show reveal sections visually but keep lock message semantics:
+        // Use a temporary class flip for preview only (5 seconds).
+        els.body.classList.add("unlocked");
+        els.body.classList.remove("locked");
+        els.heroTitle.textContent = "Preview tampilan (bukan buka kunci)";
+        els.heroDesc.textContent =
+          "Ini hanya preview untuk cek layout foto & video. Akan balik terkunci otomatis.";
+
+        setTimeout(() => {
+          // back to real state
+          updateCountdown();
+        }, 5000);
+      });
+
+      /***********************
+       * Confetti
+       ***********************/
+      const conf = {
+        canvas: document.getElementById("confetti"),
+        ctx: null,
+        w: 0,
+        h: 0,
+        pieces: [],
+        running: false,
+        tEnd: 0,
+      };
+
+      function resizeConfetti() {
+        conf.w = conf.canvas.width = window.innerWidth * devicePixelRatio;
+        conf.h = conf.canvas.height = window.innerHeight * devicePixelRatio;
+      }
+      window.addEventListener("resize", resizeConfetti);
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function spawnPieces(count) {
+        for (let i = 0; i < count; i++) {
+          conf.pieces.push({
+            x: rand(0, conf.w),
+            y: rand(-conf.h * 0.2, 0),
+            vx: rand(-1.2, 1.2) * devicePixelRatio,
+            vy: rand(2.0, 5.8) * devicePixelRatio,
+            s: rand(6, 14) * devicePixelRatio,
+            r: rand(0, Math.PI * 2),
+            vr: rand(-0.18, 0.18),
+            a: rand(0.75, 1.0),
+            // palette-ish
+            c: [
+              "rgba(255,94,168,0.9)",
+              "rgba(124,77,255,0.9)",
+              "rgba(52,211,153,0.9)",
+              "rgba(255,255,255,0.85)",
+            ][Math.floor(rand(0, 4))],
+          });
+        }
+      }
+
+      function runConfetti(ms = 1800) {
+        if (!conf.ctx) conf.ctx = conf.canvas.getContext("2d");
+        resizeConfetti();
+        spawnPieces(120);
+        conf.running = true;
+        conf.tEnd = performance.now() + ms;
+        requestAnimationFrame(tickConfetti);
+      }
+
+      function tickConfetti(t) {
+        if (!conf.running) return;
+        const ctx = conf.ctx;
+        ctx.clearRect(0, 0, conf.w, conf.h);
+
+        // update
+        conf.pieces.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.r += p.vr;
+          p.vy *= 1.005; // gravity
+          p.vx *= 0.999;
+
+          // draw
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.r);
+          ctx.globalAlpha = p.a;
+          ctx.fillStyle = p.c;
+          ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+          ctx.restore();
+        });
+
+        // cull
+        conf.pieces = conf.pieces.filter(
+          (p) => p.y < conf.h + p.s && p.x > -100 && p.x < conf.w + 100
+        );
+
+        if (t < conf.tEnd || conf.pieces.length > 0) {
+          requestAnimationFrame(tickConfetti);
+        } else {
+          conf.running = false;
+          conf.pieces = [];
+        }
+      }
+
+      els.confettiBtn?.addEventListener("click", () => runConfetti(2400));
+
+      /***********************
+       * Init
+       ***********************/
+      buildGallery(); // build once (for unlocked; locked gallery uses placeholders anyway)
+      syncMusicButtons();
+
+      // Countdown loop
+      updateCountdown();
+      const timer = setInterval(() => {
+        const opened = updateCountdown();
+        if (opened) {
+          clearInterval(timer);
+          buildGallery();
+        }
+      }, 250);
+    </script>
+  </body>
+</html>
