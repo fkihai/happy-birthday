@@ -438,12 +438,12 @@
           <div class="badge">♥</div>
           <div>
             <h1 id="siteTitle">Untuk Istri Tercinta</h1>
-            <p id="siteSubtitle">Ada sesuatu yang kebuka pas jam 00:00.</p>
+            <p id="siteSubtitle">Ada sesuatu yang kebuka pas jam 05:30.</p>
           </div>
         </div>
         <div class="pill">
           <span class="dot"></span>
-          <span id="targetInfo">Target: besok 00:00</span>
+          <span id="targetInfo">Target: besok 05:30</span>
         </div>
       </div>
 
@@ -452,7 +452,7 @@
         <div class="card hero">
           <h2 id="heroTitle">Tunggu sebentar ya…</h2>
           <p id="heroDesc">
-            Website ini akan terbuka otomatis pas jam 00:00 besok. Begitu kebuka, ada
+            Website ini akan terbuka otomatis pas jam 05:30 besok. Begitu kebuka, ada
             foto-foto, video, dan pesan rahasia.
           </p>
 
@@ -516,7 +516,7 @@
             </div>
 
             <div class="message lockOnly" id="teaserMessage">
-              Aku punya kejutan kecil. Besok jam 06:00, semua akan kebuka. Jangan curang
+              Aku punya kejutan kecil. Besok jam 05:30, semua akan kebuka. Jangan curang
               ya.
             </div>
 
@@ -650,23 +650,23 @@ I love you, always.`,
         // Judul
         siteTitle: "For Delia Devita",
         siteSubtitle:
-          "There’s something special waiting for you It unlocks right at 06:00",
+          "There’s something special waiting for you It unlocks right at 05:30",
         heroTitleLocked: "Tunggu sebentar ya…",
         heroTitleUnlocked: "Happy Birthday!",
         heroDescLocked:
-          "Website ini akan terbuka otomatis pas jam 06:00 besok. Begitu kebuka, ada foto-foto, video, dan pesan rahasia.",
+          "Website ini akan terbuka otomatis pas jam 05:30 besok biar sebelum kerja. Begitu kebuka, ada foto-foto, video, dan pesan rahasia.",
         heroDescUnlocked:
           "Ini versi kecil dari rasa sayang yang besar. Scroll pelan-pelan, nikmati ya.",
       };
 
       /***********************
-       * TIME LOCK (00:00 besok)
+       * TIME LOCK (05:30 besok)
        ***********************/
       function getTargetMidnightTomorrow() {
         const now = new Date();
         const target = new Date(now);
         target.setDate(now.getDate());
-        target.setHours(6, 0, 0, 0);
+        target.setHours(5, 30, 0, 0);
         return target;
       }
 
